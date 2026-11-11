@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Quản Lý Dịch Vụ - KTX Admin{% endblock %}
+{% block content %}
+<h2 class="text-primary mb-3">Đăng Ký & Chỉnh Sửa Dịch Vụ Sinh Viên</h2>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form action="/dich-vu" method="POST" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Chọn Sinh Viên</label>
+                <select name="MaSV" class="form-select" required>
+                    {% for sv in sinh_viens %}
+                    <option value="{{ sv.MaSV }}">{{ sv.MaSV }} - {{ sv.HoTen }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Loại Dịch Vụ</label>
+                <select name="TenDichVu" class="form-select" required>
+                    <option value="GuiXe">Vé Gửi Xe Tháng (90.000 đ)</option>
+                    <option value="GiatSay">Vé Giặt Sấy Tháng (250.000 đ)</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Tháng</label>
+                <input type="number" name="Thang" class="form-control" value="10" required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Năm</label>
+                <input type="number" name="Nam" class="form-control" value="2026" required>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-success w-100 fw-bold">📌 Đăng Ký</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Mã SV</th>
+                    <th>Tên Sinh Viên</th>
+                    <th>Phòng</th>
+                    <th>Dịch Vụ Đăng Ký</th>
+                    <th>Đơn Giá</th>
+                    <th>Thời Gian</th>
+                    <th class="text-center">Thao Tác Admin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dv in dich_vus %}
+                <tr>
+                    <td class="fw-bold">{{ dv.MaSV }}</td>
+                    <td>{{ dv.HoTen }}</td>
+                    <td><span class="badge bg-primary">{{ dv.SoPhong }}</span></td>
+                    <td>{{ 'Vé Gửi Xe Tháng' if dv.TenDichVu == 'GuiXe' else 'Vé Giặt Sấy Tháng' }}</td>
+                    <td>{{ "%.0f"|format(dv.DonGia) }} đ</td>
+                    <td>{{ dv.Thang }}/{{ dv.Nam }}</td>
+                    <td class="text-center">
+                        <button class="btn btn-warning btn-sm me-1 fw-bold" data-bs-toggle="modal" data-bs-target="#modalSuaDV{{ dv.ID }}">
+                            ✏️ Sửa
+                        </button>
+                        <a href="/xoa-dich-vu/{{ dv.ID }}" class="btn btn-danger btn-sm fw-bold" onclick="return confirm('Hủy dịch vụ này của sinh viên?')">🗑️ Hủy</a>
+                    </td>
+                </tr>
+
+                <!-- Modal Sửa Dịch Vụ -->
+                <div class="modal fade" id="modalSuaDV{{ dv.ID }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-warning">
+                                <h5 class="modal-title fw-bold">✏️ Chỉnh Sửa Dịch Vụ Sinh Viên</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <form action="/sua-dich-vu/{{ dv.ID }}" method="POST">
+                                <div class="modal-body text-start">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Sinh Viên</label>
+                                        <input type="text" class="form-control" value="{{ dv.MaSV }} - {{ dv.HoTen }}" disabled>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Đổi Loại Dịch Vụ</label>
+                                        <select name="TenDichVu" class="form-select">
+                                            <option value="GuiXe" {% if dv.TenDichVu == 'GuiXe' %}selected{% endif %}>Vé Gửi Xe Tháng (90.000 đ)</option>
+                                            <option value="GiatSay" {% if dv.TenDichVu == 'GiatSay' %}selected{% endif %}>Vé Giặt Sấy Tháng (250.000 đ)</option>
+                                        </select>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label fw-bold">Tháng</label>
+                                            <input type="number" name="Thang" class="form-control" value="{{ dv.Thang }}" required>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label fw-bold">Năm</label>
+                                            <input type="number" name="Nam" class="form-control" value="{{ dv.Nam }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-warning fw-bold">Cập Nhật</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

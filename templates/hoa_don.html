@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Hóa Đơn KTX - Admin{% endblock %}
+{% block content %}
+<style>
+    @media print { .no-print { display: none; } }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <h2 class="text-success fw-bold mb-0">Xuất Hóa Đơn & Chỉnh Sửa Chỉ Số Hàng Tháng</h2>
+    <form action="/hoa-don" method="POST" class="d-flex align-items-center">
+        <label class="me-2 fw-bold">Tháng:</label>
+        <input type="number" name="Thang" value="{{ thang }}" class="form-control me-3" style="width: 80px;">
+        <label class="me-2 fw-bold">Năm:</label>
+        <input type="number" name="Nam" value="{{ nam }}" class="form-control me-3" style="width: 100px;">
+        <button type="submit" class="btn btn-primary fw-bold">🔄 Xem Hóa Đơn</button>
+    </form>
+</div>
+
+{% for hd in hoa_don_phongs %}
+<div class="card shadow-sm border-0 mb-5 p-4 bg-white">
+    <div class="d-flex justify-content-between border-bottom pb-3 mb-3">
+        <div>
+            <h3 class="text-primary fw-bold">HÓA ĐƠN KÝ TÚC XÁ - PHÒNG: {{ hd.SoPhong }}</h3>
+            <p class="text-muted mb-0">Tháng {{ thang }}/{{ nam }} | Sĩ số phòng: <strong>{{ hd.SoThanhVien }} sinh viên</strong></p>
+        </div>
+        <button onclick="window.print()" class="btn btn-outline-secondary no-print fw-bold">🖨️ In Hóa Đơn</button>
+    </div>
+
+    <!-- Form Chỉnh Sửa Chỉ Số Điện Nước -->
+    <form action="/hoa-don" method="POST" class="row g-3 bg-light p-3 rounded mb-4 no-print border">
+        <input type="hidden" name="SoPhong" value="{{ hd.SoPhong }}">
+        <input type="hidden" name="Thang" value="{{ thang }}">
+        <input type="hidden" name="Nam" value="{{ nam }}">
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">Chỉnh Số Điện Cũ</label>
+            <input type="number" name="SoDienCu" value="{{ hd.ChiSo.SoDienCu }}" class="form-control form-control-sm" required>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">Chỉnh Số Điện Mới</label>
+            <input type="number" name="SoDienMoi" value="{{ hd.ChiSo.SoDienMoi }}" class="form-control form-control-sm" required>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">Chỉnh Số Nước Cũ</label>
+            <input type="number" name="SoNuocCu" value="{{ hd.ChiSo.SoNuocCu }}" class="form-control form-control-sm" required>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-bold">Chỉnh Số Nước Mới</label>
+            <input type="number" name="SoNuocMoi" value="{{ hd.ChiSo.SoNuocMoi }}" class="form-control form-control-sm" required>
+        </div>
+        <div class="col-12 text-end">
+            <button type="submit" name="CapNhatChiSo" value="1" class="btn btn-sm btn-warning fw-bold">💾 Lưu & Cập Nhật Hóa Đơn</button>
+        </div>
+    </form>
+
+    <h6 class="fw-bold text-secondary">Thành viên phòng:</h6>
+    <ul class="mb-3">
+        {% for tv in hd.ThanhViens %}
+        <li>{{ tv.MaSV }} - {{ tv.HoTen }}</li>
+        {% endfor %}
+    </ul>
+
+    <table class="table table-bordered align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Nội Dung Khoản Phí</th>
+                <th>Cách Tính / Định Mức Free</th>
+                <th class="text-end">Thành Tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Tiền Thuê Phòng</td>
+                <td>{{ hd.SoThanhVien }} người × 350.000 đ</td>
+                <td class="text-end">{{ "%.0f"|format(hd.TienPhong) }} đ</td>
+            </tr>
+            <tr>
+                <td>Phí Dọn Dẹp Vệ Sinh</td>
+                <td>{{ hd.SoThanhVien }} người × 50.000 đ</td>
+                <td class="text-end">{{ "%.0f"|format(hd.PhiVeSinh) }} đ</td>
+            </tr>
+            <tr>
+                <td>Tiền Dịch Vụ Cá Nhân (Xe / Giặt Sấy)</td>
+                <td>Tổng đăng ký của các thành viên trong phòng</td>
+                <td class="text-end">{{ "%.0f"|format(hd.TienDichVu) }} đ</td>
+            </tr>
+            <tr>
+                <td>Tiền Điện Tiêu Thụ</td>
+                <td>Tiêu thụ: {{ hd.SoDienTieuThu }} số (Miễn phí {{ 10 * hd.SoThanhVien }} số) × 2.500 đ</td>
+                <td class="text-end">{{ "%.0f"|format(hd.TienDien) }} đ</td>
+            </tr>
+            <tr>
+                <td>Tiền Nước Tiêu Thụ</td>
+                <td>Tiêu thụ: {{ hd.SoNuocTieuThu }} khối (Miễn phí {{ 10 * hd.SoThanhVien }} khối) × 18.000 đ</td>
+                <td class="text-end">{{ "%.0f"|format(hd.TienNuoc) }} đ</td>
+            </tr>
+            <tr class="table-success fw-bold fs-5">
+                <td colspan="2" class="text-end">TỔNG SỐ TIỀN ADMIN NHẬN TỪ PHÒNG:</td>
+                <td class="text-end text-danger">{{ "%.0f"|format(hd.TongCong) }} đ</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endfor %}
+{% endblock %}

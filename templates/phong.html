@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Quản Lý Phòng - KTX Admin{% endblock %}
+{% block content %}
+<h2 class="text-primary fw-bold mb-3">Quản Lý Danh Sách Phòng (Tối đa 4 người/phòng)</h2>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form action="/them-phong" method="POST" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Số Phòng</label>
+                <input type="text" name="SoPhong" class="form-control" required placeholder="VD: P103">
+            </div>
+            <div class="col-md-5">
+                <label class="form-label fw-bold">Loại Phòng</label>
+                <input type="text" name="LoaiPhong" class="form-control" required placeholder="VD: Phòng Thường / VIP">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100 fw-bold">➕ Thêm Phòng Mới</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Số Phòng</th>
+                    <th>Loại Phòng</th>
+                    <th>Số Thành Viên Hiện Tại</th>
+                    <th>Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in phongs %}
+                <tr>
+                    <td class="fw-bold">{{ p.SoPhong }}</td>
+                    <td>{{ p.LoaiPhong }}</td>
+                    <td><span class="badge bg-info text-dark fs-6">{{ p.SoThanhVien }} / 4 người</span></td>
+                    <td>
+                        <a href="/xoa-phong/{{ p.SoPhong }}" class="btn btn-danger btn-sm fw-bold" onclick="return confirm('Xóa phòng này?')">🗑️ Xóa</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
